@@ -1,0 +1,191 @@
+/**
+ * 自定义css动画
+ * @author 林峰
+ */
+
+
+// 淡入动画
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+// 右上角滑入动画
+@keyframes slideInTopRight {
+    from {
+        transform: translate(100px, -100px) scale(0.5);
+        opacity: 0;
+    }
+
+    to {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.7;
+    }
+}
+
+// 左下角滑入动画
+@keyframes slideInBottomLeft {
+    from {
+        transform: translate(-100px, 100px) scale(0.5);
+        opacity: 0;
+    }
+
+    to {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.7;
+    }
+}
+
+// 缩放淡入动画
+@keyframes fadeInScale {
+    from {
+        transform: scale(0.2);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+}
+
+// 脉动动画
+@keyframes pulsate {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(0.95);
+    }
+}
+
+// 从下方滑入动画
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+// 从左侧滑入动画
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+// 宽度展开动画
+@keyframes expandWidth {
+    from {
+        width: 0;
+        opacity: 0;
+    }
+
+    to {
+        width: 80px;
+        opacity: 1;
+    }
+}
+
+// 渐变文字动画
+@keyframes gradient-text {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+// 从右侧滑入动画
+@keyframes slideInRight {
+    from {
+        transform: translateX(50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+// 卡片出现动画 - 3D效果
+@keyframes cardAppear {
+    from {
+        transform: rotateY(10deg) translateZ(-50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: rotateY(0) translateZ(0);
+        opacity: 1;
+    }
+}
+
+// 光晕脉动动画
+@keyframes pulseGlow {
+    0% {
+        opacity: 0.3;
+        transform: scale(0.9);
+    }
+
+    100% {
+        opacity: 0.6;
+        transform: scale(1.1);
+    }
+}
+
+// 弹出动画
+@keyframes popIn {
+    from {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+// 背景渐变动画
+@keyframes gradient-bg {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}

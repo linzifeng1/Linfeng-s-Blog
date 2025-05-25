@@ -1,0 +1,35 @@
+@import './base.scss';
+@import './anim.scss';
+
+* {
+  margin: 0;
+  padding: 0;
+  user-select: none; // 全局禁止用户选中文字;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+}
+
+a {
+  color: inherit; // 继承父级颜色
+  text-decoration: none; // 移除下划线
+  cursor: pointer; // 保持手型光标
+  outline: none; // 移除点击轮廓
+
+  &:hover,
+  &:active,
+  &:visited {
+    color: inherit; // 保持颜色一致
+    text-decoration: none; // 移除悬停下划线
+  }
+}
+
+#app {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}

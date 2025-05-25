@@ -1,0 +1,28 @@
+$lin-c-primary: #4da3ff;
+$lin-c-success: #4caf50;
+$lin-c-warning: #ff9800;
+$lin-c-error: #ff5252;
+
+$lin-c-white: #fff;
+
+$lin-c-black: #000;
+
+// 日间模式的颜色变量
+
+[data-theme='light'] {
+    --color-reverse-background: 0, 0, 0;
+    --color-pure-background: 255, 255, 255;
+    --color-background: 255, 255, 255;
+
+    --color-reserve-text: 255, 255, 255;
+    --color-text: 0, 0, 0;
+}
+
+[data-theme='dark'] {
+    --color-reverse-background: 255, 255, 255;
+    --color-pure-background: 0, 0, 0;
+    --color-background: 18, 18, 18;
+    
+    --color-reserve-text: 0, 0, 0;
+    --color-text: 255, 255, 255;
+}
