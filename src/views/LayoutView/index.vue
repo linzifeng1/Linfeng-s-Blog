@@ -2,6 +2,7 @@
 import { RouterView } from 'vue-router'
 import LayoutNavbar from './components/LayoutNavbar.vue';
 import LayoutFooter from './components/LayoutFooter.vue';
+
 </script>
 <template>
     <div class="layout-container">

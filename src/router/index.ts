@@ -1,7 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LayoutView from '@/views/LayoutView/index.vue'
 import HomeView from '@/views/HomeView/index.vue'
-import PhotosView from '@/views/PhotosView.vue'
+import PhotosView from '@/views/PhotosView/index.vue'
+
 import ArticleView from '@/views/ArticleView.vue'
 import RecordView from '@/views/RecordView.vue'
 import ArchiveView from '@/views/ArchiveView.vue'
