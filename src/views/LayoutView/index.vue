@@ -16,6 +16,7 @@ import LayoutFooter from './components/LayoutFooter.vue';
     display: flex;
     flex-direction: column;
     width: 100%;
+    padding-top: 4rem;// 留出顶部nav的空间
 }
 
 

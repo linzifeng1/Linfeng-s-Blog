@@ -17,9 +17,11 @@ import HomePartOne from './components/HomePartOne.vue';
     </div>
 </template>
 <style scoped lang="scss">
+
 .home-wrapper {
     // 布局属性
     position: relative;
+    margin-top: -4rem;// 去除nav留样部分 --- 由内层盒子自主设计
     width: 100%;
     min-height: 100vh;
     overflow: hidden;
@@ -40,7 +42,7 @@ import HomePartOne from './components/HomePartOne.vue';
         // 当手机端的时候不进行组件居中
         align-items: stretch;
         justify-content: flex-start;
-        padding-top: 6rem;
+        padding-top: 6rem;// 手机端自主设置顶部边距
     }
 }
 

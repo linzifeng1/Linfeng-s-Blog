@@ -1,33 +1,69 @@
 <script setup lang="ts">
-defineProps<{ isLoading: boolean; isAllLoaded?: boolean }>();
+/**
+ * isLoading: 是否显示加载中视图
+ * isAllLoaded: 是否显示没有更多数据视图
+ * loadingHeight: 加载容器的高度，默认为100vh
+ */
+defineProps<{
+    isLoading: boolean,
+    isAllLoaded?: boolean,
+    loadingHeight?: string
+}>();
 </script>
 <template>
-    <div v-if="isLoading" class="loading-container">
-        <div class="loading-animation">
-            <div class="loading-dots">
-                <div class="dot"></div>
-                <div class="dot"></div>
-                <div class="dot"></div>
+    <div class="lin-loading-wrapper">
+        <transition name="fade-slide">
+            <div v-if="isLoading" class="loading-container" :style="{ height: loadingHeight || '100vh' }">
+                <div class="loading-animation">
+                    <div class="loading-dots">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                    <div class="loading-text">
+                        <slot name="text">加载中...</slot>
+                    </div>
+                </div>
             </div>
-            <div class="loading-text">
-                <slot name="text">加载中...</slot>
+        </transition>
+        
+        <transition name="fade-slide">
+            <div v-if="isAllLoaded && !isLoading" class="all-loaded-text">
+                <div class="no-more-line"></div>
+                <slot name="allLoaded">没有更多数据</slot>
+                <div class="no-more-line"></div>
             </div>
-        </div>
-    </div>
-    <div v-else-if="isAllLoaded" class="all-loaded-text">
-        <div class="no-more-line"></div>
-        <slot name="allLoaded">没有更多数据</slot>
-        <div class="no-more-line"></div>
+        </transition>
     </div>
 </template>
 <style scoped lang="scss">
+.lin-loading-wrapper {
+    position: relative;
+}
+
+// 过渡动画
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.fade-slide-enter-from {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.fade-slide-leave-to {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
 // 优化后的加载动画
 .loading-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 80vh;
+    /* 高度现在通过props动态设置 */
 }
 
 .loading-animation {
@@ -63,7 +99,6 @@ defineProps<{ isLoading: boolean; isAllLoaded?: boolean }>();
 }
 
 @keyframes dotPulse {
-
     0%,
     80%,
     100% {
@@ -97,11 +132,11 @@ defineProps<{ isLoading: boolean; isAllLoaded?: boolean }>();
     margin: 2rem 0 1rem 0;
 
     .no-more-line {
-    flex: 1;
-    margin: 2rem;
-    height: 1px;
-    background: rgba(var(--color-reverse-background), 0.1);
-    max-width: 120px;
-  }
+        flex: 1;
+        margin: 2rem;
+        height: 1px;
+        background: rgba(var(--color-reverse-background), 0.1);
+        max-width: 120px;
+    }
 }
 </style>

@@ -46,7 +46,6 @@ const totalPhotos = ref<number>(0)
 // 获取图片数据
 const initData = async () => {
     try {
-        isLoading.value = true
         query.value.page = 1 // 重置页码
         isAllLoaded.value = false // 重置加载状态
 
@@ -129,6 +128,7 @@ const handleScroll = () => {
 }
 
 onMounted(() => {
+    isLoading.value = true
     initData()
     // 添加滚动监听
     window.addEventListener('scroll', handleScroll)
@@ -185,62 +185,63 @@ const closePhotoModal = () => {
 </script>
 <template>
     <div class="photo-container">
-        <!-- 加载动画 -->
-        <LinLoading :is-loading="isLoading">正在加载相册...</LinLoading>
-
-        <!-- 相册内容 -->
-        <div v-if="!isLoading" class="photo-content">
-            <!-- 头部控制区 -->
-            <div class="photo-header">
-                <h1 class="photo-title">
-                    我的相册
-                </h1>
-                <div class="photo-controls">
-                    <LinButton @click="toggleOrder()">{{ query.order == 'desc' ? '最新优先' : '最早优先' }}</LinButton>
-                    <div class="photo-count">
-                        <span class="count-text">共 {{ totalPhotos }} 张</span>
-                    </div>
+        <!-- 头部始终渲染 -->
+        <div class="photo-header">
+            <h1 class="photo-title">我的相册</h1>
+            <div class="photo-controls">
+                <LinButton @click="toggleOrder()" :disabled="isLoading">{{ query.order == 'desc' ? '最新优先' : '最早优先' }}
+                </LinButton>
+                <div class="photo-count">
+                    <span class="count-text">共 {{ totalPhotos }} 张</span>
                 </div>
-            </div>
-            <div class="photo-timeline">
-                <div v-for="group in photoGroups" :key="group.date" class="date-group">
-                    <!-- 日期分割线 -->
-                    <div class="date-divider">
-                        <div class="date-info">
-                            <div class="date-main">
-                                <span class="date-day">{{ formatDateDisplay(group.date).day }}</span>
-                                <div class="date-details">
-                                    <span class="date-month">{{ formatDateDisplay(group.date).month }}</span>
-                                    <span class="date-year">{{ formatDateDisplay(group.date).year }}</span>
-                                </div>
-                            </div>
-                            <span class="date-weekday">{{ formatDateDisplay(group.date).weekday }}</span>
-                        </div>
-                        <div class="divider-line">
-                            <div class="line-gradient"></div>
-                            <div class="line-dot"></div>
-                        </div>
-                    </div>
-
-                    <!-- 照片网格 -->
-                    <div class="photo-grid">
-                        <PhotoCard @click="openPhotoModal" v-for="(photo, index) in group.data"
-                            :key="photo.id + '-' + index" :photo="{ ...photo, date: group.date, tags: photo.tag }"
-                            :index="index" />
-                    </div>
-                </div>
-            </div>
-
-            <!-- 加载更多提示 - 使用 LinLoading 组件替换原有加载动画 -->
-            <div class="loading-more-container">
-                <LinLoading :is-loading="isLoadingMore"
-                    :is-all-loaded="isAllLoaded && !isLoadingMore && photoGroups.length > 0">
-                    <template #text>加载更多照片...</template>
-                    <template #allLoaded>已经到底啦</template>
-                </LinLoading>
             </div>
         </div>
-        <PhotoDetail :photo="selectedPhoto" :visible="isModalOpen" @close="closePhotoModal" />
+        <div class="photo-content">
+            <!-- 列表加载动画和内容分离 -->
+            <LinLoading :is-loading="isLoading">
+                <template #text>正在加载相册...</template>
+            </LinLoading>
+            <div v-if="!isLoading">
+                <div class="photo-timeline">
+                    <div v-for="group in photoGroups" :key="group.date" class="date-group">
+                        <!-- 日期分割线 -->
+                        <div class="date-divider">
+                            <div class="date-info">
+                                <div class="date-main">
+                                    <span class="date-day">{{ formatDateDisplay(group.date).day }}</span>
+                                    <div class="date-details">
+                                        <span class="date-month">{{ formatDateDisplay(group.date).month }}</span>
+                                        <span class="date-year">{{ formatDateDisplay(group.date).year }}</span>
+                                    </div>
+                                </div>
+                                <span class="date-weekday">{{ formatDateDisplay(group.date).weekday }}</span>
+                            </div>
+                            <div class="divider-line">
+                                <div class="line-gradient"></div>
+                                <div class="line-dot"></div>
+                            </div>
+                        </div>
+
+                        <!-- 照片网格 -->
+                        <div class="photo-grid">
+                            <PhotoCard @click="openPhotoModal" v-for="(photo, index) in group.data"
+                                :key="photo.id + '-' + index" :photo="{ ...photo, date: group.date, tags: photo.tag }"
+                                :index="index" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 加载更多提示保持不变 -->
+                <div class="loading-more-container">
+                    <LinLoading :is-loading="isLoadingMore"
+                        :is-all-loaded="isAllLoaded && !isLoadingMore && photoGroups.length > 0">
+                        <template #text>加载更多照片...</template>
+                        <template #allLoaded>已经到底啦</template>
+                    </LinLoading>
+                </div>
+            </div>
+            <PhotoDetail :photo="selectedPhoto" :visible="isModalOpen" @close="closePhotoModal" />
+        </div>
     </div>
 </template>
 <style scoped lang="scss">
@@ -250,11 +251,9 @@ const closePhotoModal = () => {
             rgba(var(--color-background), 1) 0%,
             rgba(var(--color-background), 0.95) 100%);
     padding: 2rem;
-    padding-top: 6rem;
 
     @media (max-width: 768px) {
         padding: 1rem;
-        padding-top: 5rem;
     }
 }
 
@@ -278,7 +277,12 @@ const closePhotoModal = () => {
 .photo-title {
     font-size: 2.5rem;
     font-weight: 700;
-    color: rgba(var(--color-text), 1);
+    background: linear-gradient(135deg, $lin-c-primary, #9333ea);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradient-text 3s ease-in-out infinite;
+    // 背景的显示区域
+    background-clip: text;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -460,10 +464,6 @@ const closePhotoModal = () => {
         min-height: 100px;
     }
 }
-
-// 移除原有的 .loading-more 和 .loading-spinner 样式
-
-// 移除原有的 @keyframes spin 动画
 
 .all-loaded {
     text-align: center;

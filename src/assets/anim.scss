@@ -1,5 +1,5 @@
 /**
- * 自定义css动画
+ * 所有的自定义css动画都在这里(MyDesignedComponent除外)
  * @author 林峰
  */
 
@@ -82,7 +82,10 @@
     }
 }
 
-// 从左侧滑入动画
+/**
+ * 从左向右滑动动画
+ * 用处：HomePartOne-->(.left-section)
+ */
 @keyframes slideInLeft {
     from {
         transform: translateX(-50px);
@@ -108,7 +111,13 @@
     }
 }
 
-// 渐变文字动画
+/**
+ * 文字渐变色动画
+ * 用处：
+ * HomePartOne-->(.title)
+ * PhotosView-->(.photo-title)
+ * ArticleView-->(.title)
+ */
 @keyframes gradient-text {
     0% {
         background-position: 0% 50%;
@@ -187,5 +196,39 @@
 
     100% {
         background-position: 0% 50%;
+    }
+}
+
+// ************************************************************************ //
+
+/**
+ * 从上到下淡入动画
+ * 用处：ArticleView-->(.header)
+ */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/**
+ * 从下到上淡入动画
+ * 用处：ArticleItem-->(.article-card)
+ */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
