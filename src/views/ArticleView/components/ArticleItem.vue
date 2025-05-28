@@ -27,7 +27,7 @@ const formatNumber = (num: number): string => {
 </script>
 
 <template>
-  <article class="article-card">
+  <div class="article-card">
     <div class="article-header">
       <h2 class="article-title">{{ props.article.title }}</h2>
       <div class="author-info">
@@ -67,19 +67,19 @@ const formatNumber = (num: number): string => {
         </span>
       </div>
     </div>
-  </article>
+  </div>
 </template>
 
 <style scoped lang="scss">
-
 .article-card {
-  background: rgb(var(--color-background));
+  background-color: rgb(var(--color-background));
   border: 1px solid rgba(var(--color-text), 0.1);
   border-radius: 12px;
   padding: 24px;
   animation: fadeInUp 0.6s ease-out;
   transition: all 0.2s ease;
   cursor: pointer;
+  z-index: 1;// 防止背景动画遮盖
   
   &:hover {
     border-color: rgba(var(--color-text), 0.2);
@@ -89,7 +89,6 @@ const formatNumber = (num: number): string => {
   
   @media (max-width: 768px) {
     padding: 20px;
-    margin-bottom: 16px;
   }
 }
 

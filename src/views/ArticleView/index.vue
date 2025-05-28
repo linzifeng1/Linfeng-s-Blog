@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import LinLoading from '@/components/MyDesignComponents/Lin-Loading.vue'
 import AritcleItem from './components/ArticleItem.vue'
 import { getData } from '@/api/articleApi/index.ts'
+import LinBackground from '@/components/MyDesignComponents/Lin-Background.vue'
 
 // 文章数据类型定义
 interface Article {
@@ -77,6 +78,8 @@ onUnmounted(() => {
 
 <template>
   <div class="article-view">
+    <!-- 添加背景组件 -->
+    <LinBackground />
     <!-- 头部标题 -->
     <div class="header">
       <h1 class="title">全部文章</h1>
@@ -105,43 +108,49 @@ onUnmounted(() => {
 .article-view {
   display: flex;
   flex-direction: column;
-  max-width: 800px;
+  max-width: 1200px;
   width: 100%;
   margin: 0 auto;
-  padding: 2rem;
   background: rgb(var(--color-background));
 
   @media (max-width: 768px) {
-    padding: 1rem;
+    padding: 0 1rem;
   }
 }
 
 .header {
-  text-align: center;
-  margin-bottom: 40px;
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  padding: 2rem 0;
+  margin: 0 auto;
+  align-items: center;
+  justify-content: space-between;
   animation: fadeInDown 0.8s ease-out;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    justify-content: center;
+  }
 
   .title {
     font-size: 2.5rem;
     font-weight: 700;
-    color: rgb(var(--color-text));
-    margin-bottom: 10px;
     background: linear-gradient(135deg, $lin-c-primary, #9333ea);
-    // 背景的显示区域
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: gradient-text 3s ease-in-out infinite;
-
-    @media (max-width: 768px) {
-      font-size: 2rem;
-    }
   }
 
   .subtitle {
+    display: block;
     font-size: 1.1rem;
-    color: rgba(var(--color-text), 0.7);
-    margin: 0;
+    font-weight: 400;
+    color: rgba(var(--color-text), 0.6);
+    margin-top: 0.25rem;
+    background: none;
+    -webkit-text-fill-color: rgba(var(--color-text), 0.6);
   }
 }
 

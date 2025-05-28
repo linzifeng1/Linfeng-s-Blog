@@ -3,6 +3,7 @@ import { onMounted, ref, onUnmounted } from 'vue'
 import { getData } from '@/api/photoApi/index.ts'
 import LinLoading from '@/components/MyDesignComponents/Lin-Loading.vue'
 import LinButton from '@/components/MyDesignComponents/Lin-Button.vue'
+import LinBackground from '@/components/MyDesignComponents/Lin-Background.vue'
 import PhotoCard from './components/PhotoCard.vue'
 import PhotoDetail from './components/PhotoDetail.vue'
 import { toast } from 'vue-sonner'
@@ -183,8 +184,12 @@ const closePhotoModal = () => {
     selectedPhoto.value = null
 }
 </script>
+
 <template>
     <div class="photo-container">
+        <!-- 添加背景组件 -->
+        <LinBackground />
+
         <!-- 头部始终渲染 -->
         <div class="photo-header">
             <h1 class="photo-title">我的相册</h1>
@@ -196,64 +201,70 @@ const closePhotoModal = () => {
                 </div>
             </div>
         </div>
-        <div class="photo-content">
-            <!-- 列表加载动画和内容分离 -->
-            <LinLoading :is-loading="isLoading">
-                <template #text>正在加载相册...</template>
-            </LinLoading>
-            <div v-if="!isLoading">
-                <div class="photo-timeline">
-                    <div v-for="group in photoGroups" :key="group.date" class="date-group">
-                        <!-- 日期分割线 -->
-                        <div class="date-divider">
-                            <div class="date-info">
-                                <div class="date-main">
-                                    <span class="date-day">{{ formatDateDisplay(group.date).day }}</span>
-                                    <div class="date-details">
-                                        <span class="date-month">{{ formatDateDisplay(group.date).month }}</span>
-                                        <span class="date-year">{{ formatDateDisplay(group.date).year }}</span>
-                                    </div>
-                                </div>
-                                <span class="date-weekday">{{ formatDateDisplay(group.date).weekday }}</span>
-                            </div>
-                            <div class="divider-line">
-                                <div class="line-gradient"></div>
-                                <div class="line-dot"></div>
-                            </div>
-                        </div>
 
-                        <!-- 照片网格 -->
-                        <div class="photo-grid">
-                            <PhotoCard @click="openPhotoModal" v-for="(photo, index) in group.data"
-                                :key="photo.id + '-' + index" :photo="{ ...photo, date: group.date, tags: photo.tag }"
-                                :index="index" />
+        <!-- 内容部分 -->
+        <div class="photo-content">
+            <div class="photo-timeline">
+                <div v-for="(group, index) in photoGroups" :key="group.date" class="date-group">
+                    <!-- 日期分割线 -->
+                    <div class="date-divider" :class="{ first: index === 0 }">
+                        <div class="date-info">
+                            <div class="date-main">
+                                <span class="date-day">{{ formatDateDisplay(group.date).day }}</span>
+                                <div class="date-details">
+                                    <span class="date-month">{{ formatDateDisplay(group.date).month }}</span>
+                                    <span class="date-year">{{ formatDateDisplay(group.date).year }}</span>
+                                </div>
+                            </div>
+                            <span class="date-weekday">{{ formatDateDisplay(group.date).weekday }}</span>
+                        </div>
+                        <div class="divider-line">
+                            <div class="line-gradient"></div>
+                            <div class="line-dot"></div>
                         </div>
                     </div>
-                </div>
 
-                <!-- 加载更多提示保持不变 -->
-                <div class="loading-more-container">
-                    <LinLoading :is-loading="isLoadingMore"
-                        :is-all-loaded="isAllLoaded && !isLoadingMore && photoGroups.length > 0">
-                        <template #text>加载更多照片...</template>
-                        <template #allLoaded>已经到底啦</template>
-                    </LinLoading>
+                    <!-- 照片网格 -->
+                    <div class="photo-grid">
+                        <PhotoCard @click="openPhotoModal" v-for="(photo, index) in group.data"
+                            :key="photo.id + '-' + index" :photo="{ ...photo, date: group.date, tags: photo.tag }"
+                            :index="index" />
+                    </div>
                 </div>
             </div>
-            <PhotoDetail :photo="selectedPhoto" :visible="isModalOpen" @close="closePhotoModal" />
+
+            <!-- 加载更多提示保持不变 -->
+            <div class="loading-more-container">
+                <LinLoading :is-loading="isLoadingMore" loading-height="200px"
+                    :is-all-loaded="isAllLoaded && !isLoadingMore && photoGroups.length > 0">
+                    <template #text>加载更多照片...</template>
+                    <template #allLoaded>已经到底啦</template>
+                </LinLoading>
+            </div>
         </div>
+
+        <!-- 列表加载动画和内容分离 -->
+        <LinLoading loading-height="200px" :is-loading="isLoading">
+            <template #text>正在加载相册...</template>
+        </LinLoading>
+
+        <!-- 点击展开图片详情 -->
+        <PhotoDetail :photo="selectedPhoto" :visible="isModalOpen" @close="closePhotoModal" />
     </div>
 </template>
 <style scoped lang="scss">
 .photo-container {
-    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
     background: linear-gradient(135deg,
             rgba(var(--color-background), 1) 0%,
             rgba(var(--color-background), 0.95) 100%);
-    padding: 2rem;
 
     @media (max-width: 768px) {
-        padding: 1rem;
+        padding: 0 1rem;
     }
 }
 
@@ -263,9 +274,8 @@ const closePhotoModal = () => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 3rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 2px solid rgba(var(--color-text), 0.1);
+    padding: 2rem 0;
+    animation: fadeInDown 0.8s ease-out;
 
     @media (max-width: 768px) {
         flex-direction: column;
@@ -281,15 +291,10 @@ const closePhotoModal = () => {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: gradient-text 3s ease-in-out infinite;
-    // 背景的显示区域
     background-clip: text;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-
-    @media (max-width: 768px) {
-        font-size: 2rem;
-    }
 }
 
 .photo-controls {
@@ -325,26 +330,16 @@ const closePhotoModal = () => {
     }
 }
 
-
-
-
-// 时间线布局
-.photo-timeline {
-    .date-group {
-        margin-bottom: 4rem;
-
-        &:last-child {
-            margin-bottom: 0;
-        }
-    }
-}
-
 // 重新设计的日期分割线
 .date-divider {
     display: flex;
     align-items: center;
-    margin-bottom: 2.5rem;
+    margin: 2rem 0;
     position: relative;
+
+    &.first {
+        margin-top: 0;
+    }
 }
 
 .date-info {

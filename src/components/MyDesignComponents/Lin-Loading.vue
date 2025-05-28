@@ -63,7 +63,6 @@ defineProps<{
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    /* 高度现在通过props动态设置 */
 }
 
 .loading-animation {

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import LinBackground from '@/components/MyDesignComponents/Lin-Background.vue'
 
 // 笔记数据类型定义
 interface Note {
@@ -105,7 +106,7 @@ const addNote = () => {
       'from-teal-400 to-green-500',
       'from-indigo-400 to-blue-500'
     ]
-    
+
     notes.value.unshift({
       id: Date.now(),
       title: newNote.value.title,
@@ -116,7 +117,7 @@ const addNote = () => {
       color: colors[Math.floor(Math.random() * colors.length)],
       isPinned: false
     })
-    
+
     // 重置表单
     newNote.value = {
       title: '',
@@ -159,30 +160,13 @@ onMounted(() => {
 
 <template>
   <div class="record-view">
-    <!-- 背景装饰 -->
-    <div class="background-decoration">
-      <div class="floating-shape shape-1"></div>
-      <div class="floating-shape shape-2"></div>
-      <div class="floating-shape shape-3"></div>
-    </div>
+    <!-- 使用背景组件 -->
+    <LinBackground />
 
     <!-- 头部区域 -->
     <header class="header">
-      <div class="header-content">
-        <h1 class="title">
-          <span class="title-icon">📝</span>
-          随手笔记
-          <span class="title-subtitle">记录生活的美好瞬间</span>
-        </h1>
-        <button 
-          @click="showAddForm = !showAddForm" 
-          class="add-btn"
-          :class="{ active: showAddForm }"
-        >
-          <span class="add-icon">+</span>
-          <span class="add-text">新建笔记</span>
-        </button>
-      </div>
+      <h1 class="title">随手笔记</h1>
+      <span class="title-subtitle">记录生活的每一个美好瞬间</span>
     </header>
 
     <!-- 添加笔记表单 -->
@@ -190,13 +174,7 @@ onMounted(() => {
       <div v-if="showAddForm" class="add-form-container">
         <form @submit.prevent="addNote" class="add-form">
           <div class="form-row">
-            <input 
-              v-model="newNote.title" 
-              type="text" 
-              placeholder="笔记标题..." 
-              class="form-input title-input"
-              required
-            >
+            <input v-model="newNote.title" type="text" placeholder="笔记标题..." class="form-input title-input" required>
             <select v-model="newNote.mood" class="form-select">
               <option value="happy">😊 开心</option>
               <option value="excited">🤩 兴奋</option>
@@ -205,20 +183,10 @@ onMounted(() => {
               <option value="sad">😢 难过</option>
             </select>
           </div>
-          <textarea 
-            v-model="newNote.content" 
-            placeholder="写下你的想法..." 
-            class="form-textarea"
-            rows="4"
-            required
-          ></textarea>
+          <textarea v-model="newNote.content" placeholder="写下你的想法..." class="form-textarea" rows="4"
+            required></textarea>
           <div class="form-row">
-            <input 
-              v-model="newNote.tags" 
-              type="text" 
-              placeholder="标签 (用逗号分隔)" 
-              class="form-input tags-input"
-            >
+            <input v-model="newNote.tags" type="text" placeholder="标签 (用逗号分隔)" class="form-input tags-input">
             <div class="form-actions">
               <button type="button" @click="showAddForm = false" class="btn-cancel">
                 取消
@@ -235,45 +203,32 @@ onMounted(() => {
     <!-- 笔记列表 -->
     <main class="notes-container">
       <div class="notes-grid">
-        <div 
-          v-for="note in notes" 
-          :key="note.id"
-          class="note-card"
-          :class="{ pinned: note.isPinned }"
-        >
+        <div v-for="note in notes" :key="note.id" class="note-card" :class="{ pinned: note.isPinned }">
           <!-- 置顶标识 -->
           <div v-if="note.isPinned" class="pin-indicator">
             📌
           </div>
-          
+
           <!-- 渐变背景 -->
           <div class="note-bg" :class="`bg-gradient-to-br ${note.color}`"></div>
-          
+
           <!-- 笔记内容 -->
           <div class="note-content">
             <div class="note-header">
               <h3 class="note-title">{{ note.title }}</h3>
               <div class="note-actions">
-                <button 
-                  @click="togglePin(note)" 
-                  class="action-btn pin-btn"
-                  :class="{ active: note.isPinned }"
-                  title="置顶"
-                >
+                <button @click="togglePin(note)" class="action-btn pin-btn" :class="{ active: note.isPinned }"
+                  title="置顶">
                   📌
                 </button>
-                <button 
-                  @click="deleteNote(note.id)" 
-                  class="action-btn delete-btn"
-                  title="删除"
-                >
+                <button @click="deleteNote(note.id)" class="action-btn delete-btn" title="删除">
                   🗑️
                 </button>
               </div>
             </div>
-            
+
             <p class="note-text">{{ note.content }}</p>
-            
+
             <div class="note-footer">
               <div class="note-tags">
                 <span v-for="tag in note.tags" :key="tag" class="tag">
@@ -288,7 +243,7 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      
+
       <!-- 空状态 -->
       <div v-if="notes.length === 0" class="empty-state">
         <div class="empty-icon">📝</div>
@@ -300,7 +255,6 @@ onMounted(() => {
 </template>
 
 <style scoped lang="scss">
-
 .record-view {
   min-height: 100vh;
   background: rgb(var(--color-background));
@@ -308,89 +262,35 @@ onMounted(() => {
   overflow-x: hidden;
 }
 
-// 背景装饰
-.background-decoration {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.floating-shape {
-  position: absolute;
-  border-radius: 50%;
-  background: linear-gradient(45deg, rgba(77, 163, 255, 0.1), rgba(147, 51, 234, 0.1));
-  animation: pulseGlow 4s ease-in-out infinite alternate;
-  
-  &.shape-1 {
-    width: 300px;
-    height: 300px;
-    top: 10%;
-    right: -150px;
-    animation-delay: 0s;
-  }
-  
-  &.shape-2 {
-    width: 200px;
-    height: 200px;
-    bottom: 20%;
-    left: -100px;
-    animation-delay: 2s;
-  }
-  
-  &.shape-3 {
-    width: 150px;
-    height: 150px;
-    top: 60%;
-    right: 20%;
-    animation-delay: 1s;
-  }
-}
-
 // 头部样式
 .header {
-  position: relative;
-  z-index: 10;
-  padding: 2rem 1rem;
-  animation: fadeInDown 0.8s ease-out;
-}
-
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
   display: flex;
+  z-index: 10;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  max-width: 1200px;
+  animation: fadeInDown 0.8s ease-out;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
 
-.title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0;
-  
-  .title-icon {
-    font-size: 2rem;
-    animation: pulsate 2s ease-in-out infinite;
+  @media (max-width: 768px) {
+    flex-direction: column;
+    justify-content: center;
   }
-  
-  font-size: 2.5rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, $lin-c-primary, #9333ea);
-  // 背景的显示区域
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: gradient-text 3s ease-in-out infinite;
-  
+
+  .title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, $lin-c-primary, #9333ea);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradient-text 3s ease-in-out infinite;
+  }
+
   .title-subtitle {
     display: block;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     font-weight: 400;
     color: rgba(var(--color-text), 0.6);
     margin-top: 0.25rem;
@@ -399,38 +299,8 @@ onMounted(() => {
   }
 }
 
-.add-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, $lin-c-primary, #9333ea);
-  color: white;
-  border: none;
-  border-radius: 50px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(77, 163, 255, 0.3);
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(77, 163, 255, 0.4);
-  }
-  
-  &.active {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    
-    .add-icon {
-      transform: rotate(45deg);
-    }
-  }
-  
-  .add-icon {
-    font-size: 1.2rem;
-    transition: transform 0.3s ease;
-  }
-}
+
+
 
 // 添加表单样式
 .add-form-container {
@@ -454,13 +324,15 @@ onMounted(() => {
   display: flex;
   gap: 1rem;
   margin-bottom: 1rem;
-  
+
   @media (max-width: 768px) {
     flex-direction: column;
   }
 }
 
-.form-input, .form-textarea, .form-select {
+.form-input,
+.form-textarea,
+.form-select {
   flex: 1;
   padding: 0.75rem 1rem;
   border: 2px solid rgba(var(--color-text), 0.1);
@@ -469,13 +341,13 @@ onMounted(() => {
   color: rgb(var(--color-text));
   font-size: 1rem;
   transition: all 0.3s ease;
-  
+
   &:focus {
     outline: none;
     border-color: $lin-c-primary;
     box-shadow: 0 0 0 3px rgba(77, 163, 255, 0.1);
   }
-  
+
   &::placeholder {
     color: rgba(var(--color-text), 0.5);
   }
@@ -491,7 +363,8 @@ onMounted(() => {
   gap: 0.5rem;
 }
 
-.btn-cancel, .btn-submit {
+.btn-cancel,
+.btn-submit {
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 8px;
@@ -503,7 +376,7 @@ onMounted(() => {
 .btn-cancel {
   background: rgba(var(--color-text), 0.1);
   color: rgba(var(--color-text), 0.7);
-  
+
   &:hover {
     background: rgba(var(--color-text), 0.2);
   }
@@ -512,7 +385,7 @@ onMounted(() => {
 .btn-submit {
   background: $lin-c-primary;
   color: white;
-  
+
   &:hover {
     background: darken($lin-c-primary, 10%);
     transform: translateY(-1px);
@@ -532,7 +405,7 @@ onMounted(() => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
@@ -546,15 +419,15 @@ onMounted(() => {
   cursor: pointer;
   transition: all 0.3s ease;
   animation: fadeInUp 0.6s ease-out;
-  
+
   &:hover {
     transform: translateY(-5px) scale(1.02);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   }
-  
+
   &.pinned {
     order: -1;
-    
+
     .note-bg {
       &::before {
         content: '';
@@ -596,7 +469,7 @@ onMounted(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  
+
   [data-theme='dark'] & {
     background: rgba(0, 0, 0, 0.7);
   }
@@ -623,7 +496,7 @@ onMounted(() => {
   gap: 0.25rem;
   opacity: 0;
   transition: opacity 0.3s ease;
-  
+
   .note-card:hover & {
     opacity: 1;
   }
@@ -641,16 +514,16 @@ onMounted(() => {
   justify-content: center;
   font-size: 0.8rem;
   transition: all 0.3s ease;
-  
+
   &:hover {
     background: rgba(var(--color-text), 0.2);
     transform: scale(1.1);
   }
-  
+
   &.pin-btn.active {
     background: rgba(255, 215, 0, 0.3);
   }
-  
+
   &.delete-btn:hover {
     background: rgba(239, 68, 68, 0.2);
   }
@@ -748,23 +621,23 @@ onMounted(() => {
   .header {
     padding: 1.5rem 1rem;
   }
-  
+
   .title {
     font-size: 2rem;
-    
+
     .title-subtitle {
       font-size: 0.8rem;
     }
   }
-  
+
   .add-form {
     padding: 1.5rem;
   }
-  
+
   .notes-grid {
     gap: 1rem;
   }
-  
+
   .note-content {
     padding: 1.25rem;
   }
