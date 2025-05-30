@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-
+import LinTag from '@/components/MyDesignComponents/Lin-Tag.vue'
 
 interface Photo {
     id: number
@@ -57,13 +57,14 @@ const formatDate = (dateString: string) => {
                         <p class="photo-date">{{ formatDate(photo.date) }}</p>
                     </div>
                     <div class="photo-tags">
-                        <span 
+                        <LinTag 
                             v-for="tag in photo.tags" 
                             :key="tag" 
-                            class="photo-tag"
+                            type="primary"
+                            :circle="true"
                         >
                             {{ tag }}
-                        </span>
+                        </LinTag>
                     </div>
                 </div>
             </div>
@@ -206,15 +207,5 @@ const formatDate = (dateString: string) => {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-
-    .photo-tag {
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(10px);
-        color: white;
-        padding: 0.25rem 0.75rem;
-        border-radius: 15px;
-        font-size: 0.8rem;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-    }
 }
 </style>

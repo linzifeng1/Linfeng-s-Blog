@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { defineProps } from 'vue'
+import LinTag from '@/components/MyDesignComponents/Lin-Tag.vue'
 
 interface Article {
   id: number
@@ -41,7 +42,9 @@ const formatNumber = (num: number): string => {
     </div>
     
     <div class="article-tags" v-if="props.article.tags.length > 0">
-      <span v-for="tag in props.article.tags" :key="tag" class="tag">{{ tag }}</span>
+      <LinTag :circle="true" v-for="tag in props.article.tags" :key="tag" type="primary">
+        {{ tag }}
+      </LinTag>
     </div>
     
     <div class="article-footer">
@@ -164,16 +167,6 @@ const formatNumber = (num: number): string => {
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 16px;
-}
-
-.tag {
-  background: rgba(var(--color-text), 0.05);
-  color: rgba(var(--color-text), 0.8);
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: 1px solid rgba(var(--color-text), 0.1);
 }
 
 .article-footer {

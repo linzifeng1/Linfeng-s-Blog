@@ -92,7 +92,7 @@ onUnmounted(() => {
     </div>
     <!-- 加载状态和空状态部分保持不变 -->
     <LinLoading :is-loading="loading" :is-all-loaded="!hasMore && articles.length > 0" loading-height="200px">
-      <template #text>正在加载...</template>
+      <template #text>正在加载</template>
       <template #allLoaded>没有更多文章了</template>
     </LinLoading>
 

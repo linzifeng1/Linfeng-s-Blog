@@ -245,7 +245,7 @@ const closePhotoModal = () => {
 
         <!-- 列表加载动画和内容分离 -->
         <LinLoading loading-height="200px" :is-loading="isLoading">
-            <template #text>正在加载相册...</template>
+            <template #text>正在加载相册</template>
         </LinLoading>
 
         <!-- 点击展开图片详情 -->

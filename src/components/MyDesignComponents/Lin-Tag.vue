@@ -7,6 +7,10 @@ defineProps({
             return ['primary', 'success', 'warning', 'error'].includes(value);
         },
     },
+    circle: {
+        type: Boolean,
+        default: false,
+    },
 });
 </script>
 <template>
@@ -15,6 +19,7 @@ defineProps({
         'lin-tag--success': type === 'success',
         'lin-tag--warning': type === 'warning',
         'lin-tag--error': type === 'error',
+        'lin-tag--circle': circle,
     }">
         <slot></slot>
     </div>
@@ -33,6 +38,11 @@ defineProps({
     // 基础悬停效果
     &:hover {
         transform: translateY(-3px); // 上浮效果
+    }
+
+    // 圆角样式
+    &.lin-tag--circle {
+        border-radius: 50px; // 设置为高度的一半，实现左右纯圆角
     }
 }
 

@@ -10,10 +10,6 @@ import HomePartOne from './components/HomePartOne.vue';
         <div class="bg-blur-circle circle-3"></div>
         <div class="bg-blur-circle circle-4"></div>
         <HomePartOne />
-        <!-- 下滑查看更多提示模块 -->
-        <div class="scroll-down-container">
-            <div class="scroll-down-text">下滑查看更多</div>
-        </div>
     </div>
 </template>
 <style scoped lang="scss">
@@ -128,63 +124,5 @@ import HomePartOne from './components/HomePartOne.vue';
     padding: 2rem;
     gap: 3rem;
   }
-}
-
-
-// 下拉查看更多
-.scroll-down-container {
-    // 定位与层级
-    position: absolute;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%); // 水平居中
-    z-index: 10; // 确保在最上层
-
-    // 布局属性
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-    // 交互效果
-    cursor: pointer; // 鼠标指针
-    transition: transform 0.3s ease; // 平滑过渡
-
-    // 动画效果
-    animation: fadeInUp 1.5s ease-out 2s both; // 从下方淡入
-
-    // 悬停效果
-    &:hover {
-        transform: translateX(-50%) translateY(-5px); // 上浮效果
-
-        // 悬停时启动箭头动画
-        .scroll-down-icon {
-            .chevron {
-                animation-play-state: running;
-            }
-        }
-
-        // 悬停时文字渐变效果
-        .scroll-down-text {
-            background-position: 100% 50%;
-        }
-    }
-}
-
-// 下滑文字样式 - 保留渐变效果
-.scroll-down-text {
-    // 文字样式
-    font-size: 0.95rem;
-    font-weight: 500;
-    margin-bottom: 0.8rem;
-
-    // 渐变文字效果
-    background: linear-gradient(45deg, #4DA3FF, #6B73FF, #8A63D2);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-
-    // 过渡效果
-    transition: background-position 0.8s ease; // 渐变过渡
 }
 </style>
