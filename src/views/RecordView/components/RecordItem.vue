@@ -14,9 +14,12 @@ interface Note {
 interface Props {
   note: Note
   index: number
+  animationIndex?: number
 }
 
-defineProps<Props>()
+withDefaults(defineProps<Props>(), {
+  animationIndex: 0
+})
 
 // 心情图标映射
 const moodIcons = {
@@ -41,7 +44,7 @@ const getMoodGradient = (mood: string) => {
 </script>
 
 <template>
-  <div class="note-card" :style="{ '--index': index }">
+  <div class="note-card" :style="{ '--animation-index': animationIndex }">
     <!-- 渐变背景 -->
     <div class="note-bg" :class="`bg-gradient-to-br ${getMoodGradient(note.mood)}`"></div>
 
@@ -82,9 +85,9 @@ const getMoodGradient = (mood: string) => {
   opacity: 0;
   transform: translateY(30px);
   
-  // 动画：延迟后淡入上移
+  // 动画：延迟后淡入上移 - 使用 animation-index 而不是 index
   animation: fadeInUp 0.6s ease-out forwards;
-  animation-delay: calc(var(--index, 0) * 0.1s);
+  animation-delay: calc(var(--animation-index, 0) * 0.1s);
 
   &:hover {
     transform: translateY(-5px) scale(1.02);

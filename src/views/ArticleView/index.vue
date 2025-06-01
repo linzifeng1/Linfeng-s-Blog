@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import LinLoading from '@/components/MyDesignComponents/Lin-Loading.vue'
-import AritcleItem from './components/ArticleItem.vue'
 import { getData } from '@/api/articleApi/index.ts'
 import LinBackground from '@/components/MyDesignComponents/Lin-Background.vue'
+import LinLoading from '@/components/NewMyDesignComponents/Lin-Loading.vue'
+import AritcleItem from './components/ArticleItem.vue'
+import { Vue3Lottie } from 'vue3-lottie'
+import LoadingAnim from "@/assets/loading.json"
+import ErrorAnim from "@/assets/error.json"
+import EmptyAnim from "@/assets/empty.json"
 
 // 文章数据类型定义
 interface Article {
@@ -18,61 +22,80 @@ interface Article {
   author: string
 }
 
+// 新Lin-Loading的Props
+const isLoading = ref(false)
+const isEmpty = ref(false)
+const isLoaded = ref(false)
+const isError = ref(false)
+
 // 响应式数据
 const articles = ref<Article[]>([])
-const loading = ref(false)
-const hasMore = ref(true)
-const page = ref(1)
-const pageSize = 10
+const query = ref<{ page: number, size: number }>({
+    page: 1,
+    size: 10
+})
 
-// 加载文章数据
+// 获取文章数据
 const loadArticles = async () => {
-  if (loading.value || !hasMore.value) return
-  loading.value = true
-  try {
-    const res = await getData({ page: page.value, size: pageSize })
-    const newArticles = res.data.data || []
-    if (newArticles.length === 0) {
-      hasMore.value = false
-    } else {
-      articles.value.push(...newArticles)
-      page.value++
+    const res = await getData(query.value)
+    isLoading.value = false
+    // 1.判断数据是否获取成功
+    if (res == null) {
+        isError.value = true
+        return
     }
-  } catch (error) {
-    console.error('加载文章失败:', error)
-  } finally {
-    loading.value = false
-  }
+    const articleData = res.data || []
+    // 2.判断是否存在数据
+    if (articleData.length === 0 && query.value.page === 1) {
+        isEmpty.value = true
+        return
+    }
+
+    if (articleData.length === 0 && query.value.page > 1) {
+        isLoaded.value = true
+        return
+    }
+    // 3.所有判断均通过开始处理数据
+    if (articles.value.length === 0) {
+        articles.value = articleData
+    } else {
+        articles.value.push(...articleData)
+    }
+    // 本次数据处理完毕 --- 分页自增1
+    query.value.page++
 }
 
 // 滚动监听
 const handleScroll = () => {
-  const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-  const windowHeight = window.innerHeight
-  const documentHeight = document.documentElement.scrollHeight
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+    const windowHeight = window.innerHeight
+    const documentHeight = document.documentElement.scrollHeight
 
-  // 当滚动到距离底部 200px 时开始加载
-  if (scrollTop + windowHeight >= documentHeight - 200) {
-    loadArticles()
-  }
+    // 当滚动到距离底部 200px 时开始加载
+    if (scrollTop + windowHeight >= documentHeight - 200) {
+        isLoading.value = true
+        loadArticles()
+    }
 }
 
 // 防抖处理
 let scrollTimer: number | null = null
 const debouncedScroll = () => {
-  if (scrollTimer) clearTimeout(scrollTimer)
-  scrollTimer = setTimeout(handleScroll, 100)
+    if (scrollTimer) clearTimeout(scrollTimer)
+    scrollTimer = setTimeout(handleScroll, 100)
 }
 
 // 生命周期
 onMounted(() => {
-  loadArticles()
-  window.addEventListener('scroll', debouncedScroll)
+    // 开始加载状态
+    isLoading.value = true
+    loadArticles()
+    window.addEventListener('scroll', debouncedScroll)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', debouncedScroll)
-  if (scrollTimer) clearTimeout(scrollTimer)
+    window.removeEventListener('scroll', debouncedScroll)
+    if (scrollTimer) clearTimeout(scrollTimer)
 })
 </script>
 
@@ -80,6 +103,7 @@ onUnmounted(() => {
   <div class="article-view">
     <!-- 添加背景组件 -->
     <LinBackground />
+    
     <!-- 头部标题 -->
     <div class="header">
       <h1 class="title">全部文章</h1>
@@ -90,17 +114,26 @@ onUnmounted(() => {
     <div class="article-list">
       <AritcleItem v-for="(article, index) in articles" :key="article.id" :article="article" :index="index" />
     </div>
-    <!-- 加载状态和空状态部分保持不变 -->
-    <LinLoading :is-loading="loading" :is-all-loaded="!hasMore && articles.length > 0" loading-height="200px">
-      <template #text>正在加载</template>
-      <template #allLoaded>没有更多文章了</template>
+    
+    <!-- 新加载状态 -->
+    <LinLoading :is-loading="isLoading" height="200px" :is-empty="isEmpty" :is-loaded="isLoaded"
+        :is-error="isError">
+        <template #loadingContent>
+            <Vue3Lottie width="160px" height="120px" :animation-data="LoadingAnim"></Vue3Lottie>
+            <span style="color: rgb(var(--color-text));">正在加载</span>
+        </template>
+        <template #errorContent>
+            <Vue3Lottie width="160px" height="120px" :animation-data="ErrorAnim"></Vue3Lottie>
+            <span style="color: rgb(var(--color-text));">数据加载失败</span>
+        </template>
+        <template #emptyContent>
+            <Vue3Lottie width="160px" height="120px" :animation-data="EmptyAnim"></Vue3Lottie>
+            <span style="color: rgb(var(--color-text));">没有找到任何内容</span>
+        </template>
+        <template #loadedContent>
+            <span style="color: rgb(var(--color-text));">没有更多数据</span>
+        </template>
     </LinLoading>
-
-    <!-- 空状态 -->
-    <div v-if="!loading && articles.length === 0" class="empty-state">
-      <div class="empty-icon">📝</div>
-      <p>暂无文章</p>
-    </div>
   </div>
 </template>
 
@@ -158,34 +191,5 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-}
-
-.loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 40px 20px;
-  color: rgba(var(--color-text), 0.7);
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 20px;
-  color: rgba(var(--color-text), 0.6);
-
-  .empty-icon {
-    font-size: 4rem;
-    margin-bottom: 16px;
-    opacity: 0.6;
-  }
-
-  p {
-    margin: 0;
-    font-size: 1.1rem;
-    opacity: 0.8;
-  }
 }
 </style>

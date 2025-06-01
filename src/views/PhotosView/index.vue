@@ -1,146 +1,110 @@
 <script setup lang="ts">
-import { onMounted, ref, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { getData } from '@/api/photoApi/index.ts'
-import LinLoading from '@/components/MyDesignComponents/Lin-Loading.vue'
-import LinButton from '@/components/MyDesignComponents/Lin-Button.vue'
 import LinBackground from '@/components/MyDesignComponents/Lin-Background.vue'
+import LinLoading from '@/components/NewMyDesignComponents/Lin-Loading.vue'
+import LinButton from '@/components/MyDesignComponents/Lin-Button.vue'
 import PhotoCard from './components/PhotoCard.vue'
 import PhotoDetail from './components/PhotoDetail.vue'
-import { toast } from 'vue-sonner'
+import { Vue3Lottie } from 'vue3-lottie'
+import LoadingAnim from "@/assets/loading.json"
+import ErrorAnim from "@/assets/error.json"
+import EmptyAnim from "@/assets/empty.json"
 
-
-// 分页查询参数 //
-const query = ref<{
-    page: number
-    size: number
-    order: 'desc' | 'asc'
-}>({
-    page: 1,
-    size: 10,
-    order: 'desc'
-})
-
-// 图片数据集 //
+// 图片数据类型定义
 interface Photo {
     id: number
     url: string
     title: string
     desc: string
     date: string
-    tags: string[]  // 注意字段名与JSON中的'tag'保持一致
+    tags: string[]
 }
-const photos = ref<Photo[]>([])
 
-// 是否显示加载页面 //
-const isLoading = ref<boolean>(false)
-// 是否正在加载更多 //
-const isLoadingMore = ref<boolean>(false)
-// 是否已加载全部数据 //
-const isAllLoaded = ref<boolean>(false)
+// 新Lin-Loading的Props
+const isLoading = ref(false)
+const isEmpty = ref(false)
+const isLoaded = ref(false)
+const isError = ref(false)
 
-// 照片组数据集 //
+// 响应式数据
 const photoGroups = ref<any[]>([])
+const query = ref<{ page: number, size: number, order: 'desc' | 'asc' }>({
+    page: 1,
+    size: 10,
+    order: 'desc'
+})
 
-// 总照片数量 // 
+// 总照片数量
 const totalPhotos = ref<number>(0)
 
-// 获取图片数据
-const initData = async () => {
-    try {
-        query.value.page = 1 // 重置页码
-        isAllLoaded.value = false // 重置加载状态
-
-        const res = await getData(query.value)
-        console.log(res)
-        photoGroups.value = res.data.data // 直接保存分组数据
-        totalPhotos.value = res.data.pagination.totalPhotos
-    } catch (error) {
-        toast.error('Error', {
-            description: '获取相册数据失败！'
-        })
-        console.log(error);
-    } finally {
-        isLoading.value = false
+// 获取照片数据
+const loadPhotos = async () => {
+    const res = await getData(query.value)
+    isLoading.value = false
+    // 1.判断数据是否获取成功
+    if (res == null) {
+        isError.value = true
+        return
     }
+    const photoData = res.data || []
+    // 2.判断是否存在数据
+    if (photoData.length === 0 && query.value.page === 1) {
+        isEmpty.value = true
+        return
+    }
+
+    if (photoData.length === 0 && query.value.page > 1) {
+        isLoaded.value = true
+        return
+    }
+    // 3.所有判断均通过开始处理数据
+    if (photoGroups.value.length === 0) {
+        photoGroups.value = photoData
+    } else {
+        photoGroups.value.push(...photoData)
+    }
+    
+    // 更新总数
+    if (res.data.pagination) {
+        totalPhotos.value = res.data.pagination.totalPhotos
+    }
+    
+    // 本次数据处理完毕 --- 分页自增1
+    query.value.page++
 }
 
-/**
- * 加载更多数据的方法
- */
-const loadMoreData = async () => {
-    if (isLoadingMore.value || isAllLoaded.value)
-        return
-
-    try {
-        isLoadingMore.value = true
-        query.value.page += 1 // 增加页码
-
-        const res = await getData(query.value)
-        console.log('加载更多:', res)
-
-        // 检查是否有新数据
-        if (!res.data.data || res.data.data.length === 0) {
-            isAllLoaded.value = true
-            return
-        }
-
-        // 将新数据添加到现有数据中
-        photoGroups.value = [...photoGroups.value, ...res.data.data]
-        totalPhotos.value = res.data.pagination.totalPhotos
-    } catch (error) {
-        toast.error('Error', {
-            description: '加载更多数据失败！'
-        })
-        console.log(error)
-        isAllLoaded.value = true // 出错时也标记为加载完成
-    } finally {
-        isLoadingMore.value = false
-    }
-}
-
-/**
- * 检查滚动位置的方法
- */
-const checkScrollPosition = () => {
-    // 如果已经加载全部或正在加载中，则不处理
-    if (isAllLoaded.value || isLoadingMore.value || isLoading.value)
-        return
-
-    const scrollPosition = window.scrollY
+// 滚动监听
+const handleScroll = () => {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop
     const windowHeight = window.innerHeight
     const documentHeight = document.documentElement.scrollHeight
 
-    // 当滚动到距离底部200px时触发加载更多
-    if (scrollPosition + windowHeight >= documentHeight - 200) {
-        loadMoreData()
+    // 当滚动到距离底部 200px 时开始加载
+    if (scrollTop + windowHeight >= documentHeight - 200) {
+        isLoading.value = true
+        loadPhotos()
     }
 }
 
-// 添加防抖处理
-let scrollTimeout: number | null = null
-const handleScroll = () => {
-    if (scrollTimeout) {
-        clearTimeout(scrollTimeout)
-    }
-
-    scrollTimeout = window.setTimeout(() => {
-        checkScrollPosition()
-    }, 200) // 200ms防抖
+// 防抖处理
+let scrollTimer: number | null = null
+const debouncedScroll = () => {
+    if (scrollTimer) clearTimeout(scrollTimer)
+    scrollTimer = setTimeout(handleScroll, 100)
 }
 
+// 生命周期
 onMounted(() => {
+    // 开始加载状态
     isLoading.value = true
-    initData()
-    // 添加滚动监听
-    window.addEventListener('scroll', handleScroll)
+    loadPhotos()
+    window.addEventListener('scroll', debouncedScroll)
 })
 
 onUnmounted(() => {
-    // 移除滚动监听
-    window.removeEventListener('scroll', handleScroll)
-    if (scrollTimeout) {
-        clearTimeout(scrollTimeout)
-    }
+    window.removeEventListener('scroll', debouncedScroll)
+    if (scrollTimer) clearTimeout(scrollTimer)
 })
 
 /**
@@ -162,13 +126,15 @@ const formatDateDisplay = (dateString: string) => {
  */
 const toggleOrder = () => {
     query.value.order = query.value.order === 'desc' ? 'asc' : 'desc'
-    initData()
+    query.value.page = 1
+    photoGroups.value = []
+    isLoading.value = true
+    loadPhotos()
 }
 
 /**
  * 打开照片详情部分
  */
-
 const selectedPhoto = ref<Photo | null>(null)
 const isModalOpen = ref(false)
 
@@ -232,26 +198,33 @@ const closePhotoModal = () => {
                     </div>
                 </div>
             </div>
-
-            <!-- 加载更多提示保持不变 -->
-            <div class="loading-more-container">
-                <LinLoading :is-loading="isLoadingMore" loading-height="200px"
-                    :is-all-loaded="isAllLoaded && !isLoadingMore && photoGroups.length > 0">
-                    <template #text>加载更多照片...</template>
-                    <template #allLoaded>已经到底啦</template>
-                </LinLoading>
-            </div>
         </div>
 
-        <!-- 列表加载动画和内容分离 -->
-        <LinLoading loading-height="200px" :is-loading="isLoading">
-            <template #text>正在加载相册</template>
+        <!-- 新加载状态 -->
+        <LinLoading :is-loading="isLoading" height="200px" :is-empty="isEmpty" :is-loaded="isLoaded"
+            :is-error="isError">
+            <template #loadingContent>
+                <Vue3Lottie width="160px" height="120px" :animation-data="LoadingAnim"></Vue3Lottie>
+                <span style="color: rgb(var(--color-text));">正在加载</span>
+            </template>
+            <template #errorContent>
+                <Vue3Lottie width="160px" height="120px" :animation-data="ErrorAnim"></Vue3Lottie>
+                <span style="color: rgb(var(--color-text));">数据加载失败</span>
+            </template>
+            <template #emptyContent>
+                <Vue3Lottie width="160px" height="120px" :animation-data="EmptyAnim"></Vue3Lottie>
+                <span style="color: rgb(var(--color-text));">没有找到任何内容</span>
+            </template>
+            <template #loadedContent>
+                <span style="color: rgb(var(--color-text));">没有更多数据</span>
+            </template>
         </LinLoading>
 
         <!-- 点击展开图片详情 -->
         <PhotoDetail :photo="selectedPhoto" :visible="isModalOpen" @close="closePhotoModal" />
     </div>
 </template>
+
 <style scoped lang="scss">
 .photo-container {
     display: flex;
@@ -267,7 +240,6 @@ const closePhotoModal = () => {
         padding: 0 1rem;
     }
 }
-
 
 // 头部区域
 .photo-header {
@@ -448,23 +420,5 @@ const closePhotoModal = () => {
     @media (max-width: 480px) {
         grid-template-columns: 1fr;
     }
-}
-
-// 加载更多容器样式
-.loading-more-container {
-    padding: 1rem 0;
-
-    :deep(.loading-container) {
-        height: auto;
-        min-height: 100px;
-    }
-}
-
-.all-loaded {
-    text-align: center;
-    padding: 2rem 0;
-    color: rgba(var(--color-text), 0.5);
-    font-size: 0.9rem;
-    font-style: italic;
 }
 </style>

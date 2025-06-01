@@ -2,11 +2,13 @@
 /**
  * isLoading: 是否显示加载中视图
  * isAllLoaded: 是否显示没有更多数据视图
+ * noData: 是否显示空数据状态
  * loadingHeight: 加载容器的高度，默认为100vh
  */
 defineProps<{
     isLoading: boolean,
     isAllLoaded?: boolean,
+    noData?: boolean,
     loadingHeight?: string
 }>();
 </script>
@@ -32,6 +34,21 @@ defineProps<{
                 <div class="no-more-line"></div>
                 <slot name="allLoaded">没有更多数据</slot>
                 <div class="no-more-line"></div>
+            </div>
+        </transition>
+        
+        <!-- 新增空状态 -->
+        <transition name="fade-slide">
+            <div v-if="noData && !isLoading" class="empty-state">
+                <div class="empty-icon">
+                    <slot name="emptyIcon">📝</slot>
+                </div>
+                <h3 class="empty-title">
+                    <slot name="emptyTitle">暂无数据</slot>
+                </h3>
+                <p class="empty-text">
+                    <slot name="emptyText">暂时没有找到任何内容</slot>
+                </p>
             </div>
         </transition>
     </div>
@@ -136,6 +153,52 @@ defineProps<{
         height: 1px;
         background: rgba(var(--color-reverse-background), 0.1);
         max-width: 120px;
+    }
+}
+
+// 新增空状态样式
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    animation: fadeIn 1s ease-out;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    animation: pulsate 2s ease-in-out infinite;
+}
+
+.empty-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: rgb(var(--color-text));
+    margin: 0 0 0.5rem 0;
+}
+
+.empty-text {
+    color: rgba(var(--color-text), 0.6);
+    margin: 0;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes pulsate {
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
     }
 }
 </style>

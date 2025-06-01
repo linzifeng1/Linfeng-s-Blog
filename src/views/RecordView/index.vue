@@ -2,9 +2,12 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { getData } from '@/api/recordApi/index.ts'
 import LinBackground from '@/components/MyDesignComponents/Lin-Background.vue'
-import LinLoading from '@/components/MyDesignComponents/Lin-Loading.vue'
+import LinLoading from '@/components/NewMyDesignComponents/Lin-Loading.vue'
 import RecordItem from './components/RecordItem.vue'
-import { toast } from 'vue-sonner'
+import { Vue3Lottie } from 'vue3-lottie'
+import LoadingAnim from "@/assets/loading.json"
+import ErrorAnim from "@/assets/error.json"
+import EmptyAnim from "@/assets/empty.json"
 
 // 笔记数据类型定义（移除了color和isPinned属性）
 interface Note {
@@ -16,48 +19,54 @@ interface Note {
     mood: 'happy' | 'sad' | 'excited' | 'calm' | 'thoughtful'
 }
 
+// 新Lin-Loading的Props
+const isLoading = ref(false)
+const isEmpty = ref(false)
+const isLoaded = ref(false)
+const isError = ref(false)
+
 // 响应式数据
 const notes = ref<Note[]>([])
-const loading = ref(false)
-const loadingMore = ref(false)
-const hasMore = ref(true)
-const page = ref(1)
-const pageSize = 10
+const query = ref<{ page: number, size: number }>({
+    page: 1,
+    size: 10
+})
+
+// 动画索引计数器
+const animationIndex = ref(0)
 
 // 获取笔记数据
-const loadNotes = async (isLoadMore = false) => {
-    if (loading.value || loadingMore.value || !hasMore.value)
+const loadNotes = async () => {
+    const res = await getData(query.value)
+    isLoading.value = false
+    // 1.判断数据是否获取成功
+    if (res == null) {
+        isError.value = true
         return
+    }
+    const noteData = res.data || []
+    // 2.判断是否存在数据
+    if (noteData.length === 0 && query.value.page === 1) {
+        isEmpty.value = true
+        return
+    }
 
-    if (isLoadMore) {
-        loadingMore.value = true
+    if (noteData.length === 0 && query.value.page > 1) {
+        isLoaded.value = true
+        return
+    }
+    // 3.所有判断均通过开始处理数据
+    if (notes.value.length === 0) {
+        notes.value = noteData
+        // 首次加载，重置动画索引
+        animationIndex.value = 0
     } else {
-        loading.value = true
+        notes.value.push(...noteData)
+        // 新数据加载，重置动画索引为当前批次的起始
+        animationIndex.value = 0
     }
-
-    try {
-        const res = await getData({ page: page.value, size: pageSize })
-        const newNotes = res.data.data || []
-
-        if (newNotes.length === 0) {
-            hasMore.value = false
-        } else {
-            if (isLoadMore) {
-                notes.value.push(...newNotes)
-            } else {
-                notes.value = newNotes
-            }
-            page.value++
-        }
-    } catch (error) {
-        console.error('加载笔记失败:', error)
-        toast.error('Error', {
-            description: '获取笔记数据失败！'
-        })
-    } finally {
-        loading.value = false
-        loadingMore.value = false
-    }
+    // 本次数据处理完毕 --- 分页自增1
+    query.value.page++
 }
 
 // 滚动监听
@@ -68,7 +77,8 @@ const handleScroll = () => {
 
     // 当滚动到距离底部 200px 时开始加载
     if (scrollTop + windowHeight >= documentHeight - 200) {
-        loadNotes(true)
+        isLoading.value = true
+        loadNotes()
     }
 }
 
@@ -81,6 +91,8 @@ const debouncedScroll = () => {
 
 // 生命周期
 onMounted(() => {
+    // 开始加载状态
+    isLoading.value = true
     loadNotes()
     window.addEventListener('scroll', debouncedScroll)
 })
@@ -105,29 +117,34 @@ onUnmounted(() => {
         <!-- 笔记列表 -->
         <main class="notes-container">
             <div class="notes-grid">
-                <RecordItem v-for="(note, index) in notes" :key="note.id" :note="note" :index="index"
-                    :style="{ '--index': index }" />
+                <RecordItem 
+                    v-for="(note, index) in notes" 
+                    :key="note.id" 
+                    :note="note" 
+                    :index="index"
+                    :animation-index="index >= notes.length - query.size ? index - (notes.length - query.size) : index"
+                    :style="{ '--animation-index': index >= notes.length - query.size ? index - (notes.length - query.size) : index }" 
+                />
             </div>
 
-
-
-            <!-- 空状态 -->
-            <div v-if="notes.length === 0 && !loading" class="empty-state">
-                <div class="empty-icon">📝</div>
-                <h3 class="empty-title">还没有笔记</h3>
-                <p class="empty-text">暂时没有找到任何笔记内容</p>
-            </div>
-
-            <!-- 加载状态 -->
-            <LinLoading :isLoading="loading" loading-height="200px">
-                <template #text>正在加载笔记...</template>
-            </LinLoading>
-
-
-            <!-- 没有更多数据和加载更多数据 -->
-            <LinLoading :isLoading="loadingMore" :isAllLoaded="!hasMore" loadingHeight="200px">
-                <template #text>加载更多</template>
-                <template #allLoaded>没有更多笔记了</template>
+            <!-- 新加载状态 -->
+            <LinLoading :is-loading="isLoading" height="200px" :is-empty="isEmpty" :is-loaded="isLoaded"
+                :is-error="isError">
+                <template #loadingContent>
+                    <Vue3Lottie width="160px" height="120px" :animation-data="LoadingAnim"></Vue3Lottie>
+                    <span style="color: rgb(var(--color-text));">正在加载</span>
+                </template>
+                <template #errorContent>
+                    <Vue3Lottie width="160px" height="120px" :animation-data="ErrorAnim"></Vue3Lottie>
+                    <span style="color: rgb(var(--color-text));">数据加载失败</span>
+                </template>
+                <template #emptyContent>
+                    <Vue3Lottie width="160px" height="120px" :animation-data="EmptyAnim"></Vue3Lottie>
+                    <span style="color: rgb(var(--color-text));">没有找到任何内容</span>
+                </template>
+                <template #loadedContent>
+                    <span style="color: rgb(var(--color-text));">没有更多数据</span>
+                </template>
             </LinLoading>
 
         </main>
@@ -198,31 +215,6 @@ onUnmounted(() => {
     }
 }
 
-// 空状态
-.empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-    animation: fadeIn 1s ease-out;
-}
-
-.empty-icon {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    animation: pulsate 2s ease-in-out infinite;
-}
-
-.empty-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: rgb(var(--color-text));
-    margin: 0 0 0.5rem 0;
-}
-
-.empty-text {
-    color: rgba(var(--color-text), 0.6);
-    margin: 0;
-}
-
 // 动画定义
 @keyframes fadeInDown {
     from {
@@ -233,30 +225,6 @@ onUnmounted(() => {
     to {
         opacity: 1;
         transform: translateY(0);
-    }
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes pulsate {
-
-    0%,
-    100% {
-        transform: scale(1);
-        opacity: 0.8;
-    }
-
-    50% {
-        transform: scale(1.1);
-        opacity: 1;
     }
 }
 
