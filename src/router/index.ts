@@ -6,7 +6,7 @@ import ArticleView from '@/views/ArticleView/index.vue'
 import RecordView from '@/views/RecordView/index.vue'
 import ArchiveView from '@/views/ArchiveView.vue'
 import MindView from '@/views/MindView.vue'
-import LabelView from '@/views/LabelView.vue'
+import LabelView from '@/views/LabelView/index.vue'
 import MoreView from '@/views/MoreView.vue'
 
 const router = createRouter({
